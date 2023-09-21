@@ -1,12 +1,12 @@
 {
-  "name": "treer",
-  "version": "1.0.4",
+  "name": "@smk17/treer",
+  "version": "1.0.5",
   "description": "a directory structure tree generator",
   "bin": {
     "treer": "src/index.js"
   },
   "main": "index.js",
-  "author": "Deryck Tse",
+  "author": "Seng Mitnick",
   "license": "MIT",
   "keywords": [
     "directory",
@@ -16,13 +16,14 @@
     "tree"
   ],
   "dependencies": {
-    "commander": "^2.9.0"
+    "commander": "^2.9.0",
+    "ignore": "^5.2.4"
   },
   "repository": {
-    "type" : "git",
-    "url" : "git@github.com:derycktse/treer.git"
+    "type": "git",
+    "url": "git@github.com:sengmitnick/treer.git"
   },
   "bugs": {
-    "url" : "https://github.com/derycktse/treer/issues"
+    "url": "https://github.com/sengmitnick/treer/issues"
   }
 }
