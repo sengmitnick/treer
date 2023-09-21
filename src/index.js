@@ -18,6 +18,7 @@ program
   .option("-f, --only-folder", "output folder only")
   .option("-j, --json", "output tree json")
   .option("-a, --flat", "output flatten array")
+  .option("-m, --markdown", "output markdown")
   .parse(process.argv);
 
 let ignoreRegex = null;
@@ -147,6 +148,10 @@ if (program.json) {
 } else {
   drawDirTree(result, "");
   outputString = outputString.replace(/^\n/, "");
+}
+
+if (program.markdown) {
+  outputString = `\`\`\`json\n${outputString}\n\`\`\``;
 }
 
 console.log(outputString);
