@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
+const fs = require("fs");
 const path = require("path");
 const ignore = require("ignore");
 const program = require("commander");
+const Parser = require("tree-sitter");
+const JavaScript = require("tree-sitter-javascript");
 const package = require("../package.json");
-const fs = require("fs");
 
 program
   .version(package.version)
@@ -19,6 +21,7 @@ program
   .option("-j, --json", "output tree json")
   .option("-a, --flat", "output flatten array")
   .option("-m, --markdown", "output markdown")
+  .option("-s, --source", "output source map")
   .parse(process.argv);
 
 let ignoreRegex = null;
@@ -137,7 +140,126 @@ function flattenJSON(data, prefix = "") {
   return result;
 }
 
-if (program.json) {
+function getRankedTags2JavaScript(filePath) {
+  const parser = new Parser();
+  parser.setLanguage(JavaScript);
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+  const tree = parser.parse(fileContent);
+
+  /**
+   * @param {Parser.SyntaxNode[]} nodes
+   */
+  function flattenTree(nodes) {
+    let outputString = "";
+    for (const node of nodes) {
+      outputString += `\n\t${node.text}`;
+      // if (node.children) {
+      //   outputString += flattenTree(node.children);
+      // }
+    }
+    return outputString;
+  }
+
+  return flattenTree(tree.rootNode.children);
+}
+
+function getRankedTagsMap(filterData) {
+  let outputString = "";
+  for (const filePath of filterData) {
+    const extname = path.extname(filePath);
+
+    outputString += `\n${filePath}\n`;
+    switch (extname) {
+      case ".js":
+        outputString += getRankedTags2JavaScript(filePath);
+        break;
+      case ".py":
+        outputString += fs.readFileSync(filePath, "utf-8");
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return outputString;
+}
+
+function get_ranked_tags(chat_fnames, ranked_tags) {
+  for (const fname of chat_fnames) {
+    if (!fs.statSync(fname).isDirectory()) {
+      ranked_tags.push(fname);
+    } else {
+      get_ranked_tags(fs.readdirSync(fname), ranked_tags);
+    }
+  }
+  return ranked_tags;
+}
+function toTree(tags) {
+  if (!tags.length) {
+    return "";
+  }
+
+  tags.sort();
+
+  let output = "";
+  let last = Array(tags[0].length).fill(null);
+  let tab = "\t";
+  for (let tag of tags) {
+    tag = Array.from(tag);
+
+    for (let i = 0; i < last.length + 1; i++) {
+      if (i === last.length) {
+        break;
+      }
+      if (last[i] !== tag[i]) {
+        break;
+      }
+    }
+
+    let numCommon = i;
+
+    let indent = tab.repeat(numCommon);
+    let rest = tag.slice(numCommon);
+    for (let item of rest) {
+      output += indent + item + "\n";
+      indent += tab;
+    }
+    last = tag;
+  }
+
+  return output;
+}
+
+/**
+ *
+ * @param {string[]} chat_fnames
+ */
+function get_ranked_tags_map(chat_fnames) {
+  const ranked_tags = get_ranked_tags(chat_fnames, []);
+  const num_tags = ranked_tags.length;
+
+  let lower_bound = 0;
+  let upper_bound = num_tags;
+  let best_tree = null;
+
+  while (lower_bound <= upper_bound) {
+    const middle = Math.floor((lower_bound + upper_bound) / 2);
+    const tree = toTree(ranked_tags.slice(0, middle));
+    best_tree = tree;
+    lower_bound = middle + 1;
+  }
+  return best_tree;
+}
+
+if (program.source) {
+  const flattenData = flattenJSON(result[Object.keys(result)[0]]);
+  const filterData = ignore()
+    .add(fs.readFileSync(path.join(program.directory, ".gitignore")).toString())
+    .filter(flattenData);
+
+  outputString = get_ranked_tags_map(filterData) || "";
+} else if (program.json) {
   outputString = JSON.stringify(result, null, 2);
 } else if (program.flat) {
   const flattenData = flattenJSON(result[Object.keys(result)[0]]);
