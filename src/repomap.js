@@ -25,23 +25,32 @@ class RepoMap {
       }
 
       const tags = this.getTagsRaw(fname, relFname)
-      if (!tags || tags.length) {
+      if (!(tags && tags.length)) {
         continue
       }
       for (let tag of tags) {
         if (tag.kind === 'def') {
-          const key = [relFname, tag.name]
-          if (!defines.get(tag.name)) {
-            defines.set(tag.name, new Set())
-            definitions.set(key, new Set())
-          }
+          if (!defines.get(tag.name)) defines.set(tag.name, new Set())
           defines.get(tag.name).add(relFname)
+
+          const key = [relFname, tag.name]
+          if (!definitions.get(key)) definitions.set(key, new Set())
           definitions.get(key).add(tag)
-        } else if (tag.kind === 'ref' ) {
-          if (!references.get(tag.name)) references[tag.name] = []
+        } else if (tag.kind === 'ref') {
+          if (!references.get(tag.name)) references.set(tag.name, [])
           references.get(tag.name).push(relFname)
         }
       }
+
+      console.log("================define===============")
+      console.log("================define===============")
+      console.log(defines)
+      console.log("================references===============")
+      console.log("================references===============")
+      console.log(references)
+      console.log("================definitions===============")
+      console.log("================definitions===============")
+      console.log(definitions)
     }
   }
 
@@ -58,13 +67,13 @@ class RepoMap {
       let kind = ''
       if (match.name.startsWith('name.definition.')) kind = 'def'
       else if (match.name.startsWith('name.reference.')) kind = 'ref'
-      console.log(match)
+
       tags.push({
         relFname: relFname,
         fname: fname,
-        name: match.getText,
+        name: match.name,
         kind: kind,
-        line: match.startPosition,
+        line: match.node.startPosition,
       })
     }
     return tags
@@ -77,7 +86,7 @@ class RepoMap {
 
 
 const repomap = new RepoMap()
-console.log(repomap.getRankedTags([
+repomap.getRankedTags([
   'examples/snake/snake.py',
   'examples/snake/main.py'
-]))
+])
