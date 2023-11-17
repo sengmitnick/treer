@@ -31,5 +31,9 @@
   },
   "bugs": {
     "url": "https://github.com/sengmitnick/treer/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "repomap": "node src/repomap.js"
   }
 }

@@ -208,7 +208,8 @@ function toTree(tags) {
   for (let tag of tags) {
     tag = Array.from(tag);
 
-    for (let i = 0; i < last.length + 1; i++) {
+    let i = 0
+    for (; i < last.length + 1; i++) {
       if (i === last.length) {
         break;
       }
