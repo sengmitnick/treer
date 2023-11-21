@@ -17,6 +17,8 @@
   ],
   "dependencies": {
     "commander": "^2.9.0",
+    "graphology": "^0.25.4",
+    "graphology-metrics": "^2.2.0",
     "ignore": "^5.2.4",
     "ngraph.graph": "^20.0.1",
     "tree-sitter": "^0.20.6",
@@ -34,6 +36,7 @@
   },
   "type": "module",
   "scripts": {
-    "repomap": "node src/repomap.js"
+    "start": "node --experimental-modules --es-module-specifier-resolution=node src/repomap.js",
+    "repomap": "node --experimental-modules --es-module-specifier-resolution=node src/test_repomap.js"
   }
 }
