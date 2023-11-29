@@ -1,19 +1,81 @@
+## treer ##
+Treer is a commandline tool to generate directory structure tree
+
+<a href="https://badge.fury.io/js/treer"><img src="https://badge.fury.io/js/treer.svg" alt="npm version" height="18"></a>
 
 ## install ##
 
 ```
-$ npm install
+$ npm install @smk17/treer -g
 ```
 
 ## usage ##
 
 ```
-$ npm run repomap
+$ treer --help
+
+  Usage: treer [options]
+
+  Options:
+    -h, --help             output usage information
+    -V, --version          output the version number
+    -d, --directory [dir]  Please specify a directory to generate structure tree
+    -i, --ignore [ig]      You can ignore specific directory name (default: ".git")
+    -e, --export [epath]   export into file
+    -f, --only-folder      output folder only
+    -j, --json             output tree json
+    -a, --flat             output flatten array
+    -m, --markdown         output markdown
+    -r, --repomap          output repomap
+    -h, --help             output usage information
 ```
+
+## Available Options: ##
+`-d` Specify a directory path to generate it's structure tree
+
+`-i` or `--ignore` the directory name pattern to skip, it also support regex:
+
+```
+$ treer -i "/^regex$/"
+```
+
+`-e` or `--export` export into file
 
 ### example: ###
 ```
-$ npm run repomap
+$ treer -e ./result.txt -i .git
+
+
+treer
+├─.DS_Store
+├─.gitignore
+├─README.md
+├─package.json
+├─result.txt
+├─src
+|  └index.js
+├─node_modules
+|      ├─graceful-readlink
+|      |         ├─.npmignore
+|      |         ├─.travis.yml
+|      |         ├─LICENSE
+|      |         ├─README.md
+|      |         ├─index.js
+|      |         └package.json
+|      ├─commander
+|      |     ├─History.md
+|      |     ├─LICENSE
+|      |     ├─Readme.md
+|      |     ├─index.js
+|      |     └package.json
+
+
+The result has been saved into ./result.txt
+```
+
+### repomap example: ###
+```
+$ treer -r
 
 
 examples/snake/food.py:
