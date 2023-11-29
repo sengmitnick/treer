@@ -145,7 +145,7 @@ if (program.repomap) {
     .add(fs.readFileSync(path.join(program.directory, ".gitignore")).toString())
     .filter(flattenData);
 
-  const repomap = new RepoMap();
+  const repomap = new RepoMap(program.directory);
   const output = repomap.getRankedTagsMap([], filterData);
   outputString = output || "";
 } else if (program.json) {

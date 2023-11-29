@@ -176,7 +176,7 @@ class RepoMap {
     if (lang === "txt") return [];
     parser.setLanguage(lang);
     const query = new Query(lang, queryScm);
-    const sourceCode = fs.readFileSync(fname, "utf8");
+    const sourceCode = fs.readFileSync(this.getFname(fname), "utf8");
     const tree = parser.parse(sourceCode);
     const tags = [];
     for (let match of query.captures(tree.rootNode)) {
@@ -226,7 +226,7 @@ class RepoMap {
         } else if (curFname) output += "\n" + curFname + "\n";
 
         if (tag.kind) {
-          let code = fs.readFileSync(tag.fname, "utf8") || "";
+          let code = fs.readFileSync(this.getFname(tag.fname), "utf8") || "";
           context = new TreeContext(
             tag.relFname,
             code,
@@ -252,7 +252,11 @@ class RepoMap {
   }
 
   getRelFname(fname) {
-    return path.relative(this.root, fname);
+    return path.relative(this.root, this.getFname(fname));
+  }
+
+  getFname(fname) {
+    return path.join(this.root, fname);
   }
 
   tokenCount(str) {

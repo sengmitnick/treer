@@ -1,0 +1,44 @@
+/* css/style.css */
+
+/* 定义全局样式 */
+body {
+    font-family: Arial, sans-serif;  /* 设置字体 */
+    background-color: #f0f0f0;  /* 设置背景颜色 */
+    margin: 0;  /* 设置边距为0 */
+    padding: 0;  /* 设置内边距为0 */
+}
+
+/* 定义播放器的样式 */
+#music-player {
+    width: 300px;  /* 设置播放器的宽度 */
+    margin: 50px auto;  /* 设置播放器的上下边距为50px，左右边距自动 */
+    padding: 20px;  /* 设置播放器的内边距为20px */
+    background-color: #fff;  /* 设置播放器的背景颜色为白色 */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);  /* 设置播放器的阴影 */
+}
+
+/* 定义播放器按钮的样式 */
+#play-button,
+#pause-button,
+#forward-button,
+#rewind-button {
+    width: 50px;  /* 设置按钮的宽度 */
+    height: 50px;  /* 设置按钮的高度 */
+    margin: 10px;  /* 设置按钮的边距为10px */
+    background-color: #f0f0f0;  /* 设置按钮的背景颜色 */
+    border: none;  /* 设置按钮的边框为无 */
+    cursor: pointer;  /* 设置鼠标悬停时的样式为手型 */
+}
+
+/* 定义音量滑块的样式 */
+#volume-slider {
+    width: 100%;  /* 设置滑块的宽度为100% */
+    margin: 20px 0;  /* 设置滑块的上下边距为20px，左右边距为0 */
+}
+
+/* 定义音乐选择列表的样式 */
+#music-select {
+    width: 100%;  /* 设置音乐选择列表的宽度为100% */
+    padding: 10px;  /* 设置音乐选择列表的内边距为10px */
+    border: 1px solid #ddd;  /* 设置音乐选择列表的边框为1px的灰色实线 */
+}

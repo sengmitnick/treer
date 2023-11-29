@@ -119,4 +119,10 @@ examples/snake/snake.py:
 ⋮...
 ```
 
+## test ##
 
+```sh
+$ node src/index.js -d examples/web -r
+$ node src/index.js -d examples/python -r
+$ node src/index.js -d examples/typescript -r
+```
