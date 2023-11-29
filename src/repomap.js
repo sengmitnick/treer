@@ -1,14 +1,42 @@
 import { filenameToLang } from "./language_mapper.js"
+import TreeContext from "./tree_context.js"
 import Parser from "tree-sitter"
 import fs from "fs"
 import path from "path"
 import MultiDirectedGraph from 'graphology'
 import pagerank from 'graphology-metrics/centrality/pagerank'
+import { get_encoding } from "tiktoken"
 
 
 export default class RepoMap {
-  constructor(root = null) {
+  constructor(root = null, mapTokens = 1024) {
     this.root = root ? root : process.cwd()
+    this.maxMapTokens = mapTokens
+    this.encoding = get_encoding("cl100k_base")
+  }
+
+  getRankedTagsMap(chatFnames, otherFnames = []) {
+    const rankedTags = this.getRankedTags(chatFnames, otherFnames)
+    // console.debug(rankedTags)
+    const numTags = rankedTags.length
+    let lowerBound = 0
+    let upperBound = numTags
+    let bestTree = null
+
+    const chatRelFnames = chatFnames.map((fname) => this.getRelFname(fname))
+    while (lowerBound <= upperBound) {
+      let middle = Math.floor((lowerBound + upperBound) / 2)
+      let tree = this.toTree(rankedTags.slice(0, middle), chatRelFnames)
+      let numTokens = this.tokenCount(tree)
+
+      if (numTokens < this.maxMapTokens) {
+        bestTree = tree
+        lowerBound = middle + 1
+      } else {
+        upperBound = middle - 1
+      }
+    }
+    return bestTree
   }
 
   getRankedTags(chatFnames, otherFnames = []) {
@@ -115,14 +143,14 @@ export default class RepoMap {
     }
 
     for (let fname of relOtherFnamesWithoutTags) {
-      rankedTags.push({relFname: fname})
+      rankedTags.push({ relFname: fname })
     }
 
     // console.debug(sortedRankedDefinitions)
-    console.debug(relOtherFnamesWithoutTags)
-    console.debug(fnamesAlreadyIncluded)
+    // console.debug(relOtherFnamesWithoutTags)
+    // console.debug(fnamesAlreadyIncluded)
     // console.debug(topRank)
-    console.debug(rankedTags)
+    // console.debug(rankedTags)
     return rankedTags
   }
 
@@ -146,14 +174,69 @@ export default class RepoMap {
         fname: fname,
         name: match.node.text,
         kind: kind,
-        line: match.node.startPosition,
+        line: match.node.startPosition.row,
       })
     }
     return tags
   }
 
+  toTree(tags, chatRelFnames) {
+    if (!tags) return ''
+
+    tags = tags.filter((t) => !chatRelFnames.includes(t.relFname))
+    // console.log('BEGIN --------------------------')
+    // console.log(tags)
+    // console.log('END --------------------------')
+    tags.sort((a, b) => a.line - b.line).sort((a, b) => {
+      if (a.relFname < b.relFname) return -1
+      else if (a.relFname > b.relFname) return 1
+      else return 0
+    })
+    let curFname = null
+    let context = null
+    let output = ''
+    const dummyTag = { relFname: null }
+    for (let tag of tags.concat(dummyTag)) {
+      let thisRelFname = tag.relFname
+      if (thisRelFname != curFname) {
+        if (context) {
+          context.addContext()
+          output += "\n"
+          output += curFname + ":\n"
+          output += context.format()
+          context = null
+        } else if (curFname) output += "\n" + curFname + "\n"
+
+        if (tag.kind) {
+          let code = fs.readFileSync(tag.fname, 'utf8') || '';
+          context = new TreeContext(
+            tag.relFname,
+            code,
+            false,
+            true,
+            false,
+            false,
+            0,
+            false,
+            10, false, 0
+          )
+        }
+        curFname = thisRelFname
+      }
+
+      if (context) {
+        context.addLinesOfInterest([tag.line])
+      }
+    }
+    return output
+  }
+
   getRelFname(fname) {
     return path.relative(this.root, fname);
+  }
+
+  tokenCount(str) {
+    return this.encoding.encode(str).length
   }
 }
 
