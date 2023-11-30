@@ -5,7 +5,7 @@ const queries = require("./queries.json");
 
 const languages = {
   python: require("tree-sitter-python"),
-  // javascript: require("tree-sitter-javascript"),
+  javascript: require("tree-sitter-javascript"),
   // go: require("tree-sitter-go"),
   // c: require("tree-sitter-c"),
   // cpp: require("tree-sitter-cpp"),
